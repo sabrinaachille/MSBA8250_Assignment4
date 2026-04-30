@@ -26,24 +26,13 @@ app_ui = ui.page_navbar(
                     col_widths=(5,7)
                 ),
 
-                #Day of Week Row
+                #Time of Day Row
                 ui.layout_columns(
-                    ui.markdown("**Day of Week**"),
+                    ui.markdown("**Time of Day**"),
                     ui.input_select(
                         "day",
                         None,
-                        ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
-                    ),
-                    col_widths=(5,7)
-                ),
-
-                #Weather Row
-                ui.layout_columns(
-                    ui.markdown("**Weather (F)**"),
-                    ui.input_numeric(
-                        "weather",
-                        None,
-                        70
+                        ["Morning", "Afternoon", "Evening"]
                     ),
                     col_widths=(5,7)
                 ),
@@ -61,7 +50,7 @@ app_ui = ui.page_navbar(
 
                 ui.br(),
                 
-                #Button
+                #Predict Button
                 ui.input_action_button(
                     "predict", 
                     "Run Prediction", 
@@ -73,7 +62,10 @@ app_ui = ui.page_navbar(
             ui.card(
                 ui.card_header("Results"),
                 "Predictive and Optimization ouput here",
+                
                 ui.br(),
+                
+                #Optimize Button
                 ui.input_action_button(
                     "optimize", 
                     "Run Optimization"
