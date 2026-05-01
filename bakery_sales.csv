@@ -1,4 +1,4 @@
-date,location,Dnt_item_name,quantity_sold,sale_price,Donut_Sales,Drink_Item,Drink_Units_Sold,Drink_Price,Drink_Sales,Total_Sales,promotion,Customer_Rating,Payment_Method,time_of_day,quantity_made,waste
+date,location,donut_item,donut_units_sold,donut_unit_price,donut_sales,drink_item,drink_units_sold,drink_unit_price,drink_sales,total_sales,promotion,customer_rating,payment_method,time_of_day,donut_units_made,donut_waste
 2/21/2024,Los Angeles,Powdered Sugar,50,2.71,135.5,Iced Coffee,15,2.5,37.5,173,Yes,3.8,Mobile Payment,Afternoon,58,8
 4/2/2024,Boston,Vanilla Frosted,12,2.24,26.88,Cappuccino,21,3.25,68.25,95.13,Yes,5,Cash,Evening,15,3
 1/15/2024,Chicago,Old Fashioned,15,2.54,38.1,Latte,31,3.5,108.5,146.6,No,3.2,Credit Card,Afternoon,18,3
