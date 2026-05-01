@@ -2,7 +2,7 @@ from ortools.sat.python import cp_model
 
 COGS_RATE     = 0.40
 WASTE_PENALTY = 0.50
-SCALE         = 100
+SCALE         = 1000
 
 
 def optimize_production(demand_output: dict) -> dict:
