@@ -166,7 +166,7 @@ def server(input, output, session):
         donut_list = [
             ui.tags.li(
                 f"{item}: {values['predicted_demand']} units "
-                f"(${values['estimated_sales']})"
+                f"(Estimated Sales: ${values['estimated_sales']})"
             )
             for item, values in results["donut_demand"].items()
         ]
@@ -175,7 +175,7 @@ def server(input, output, session):
         drink_list = [
             ui.tags.li(
                 f"{item}: {values['predicted_demand']} units "
-                f"(${values['estimated_sales']})"
+                f"(Estimated Sales: ${values['estimated_sales']})"
             )
             for item, values in results["drink_demand"].items()
         ]
