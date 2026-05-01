@@ -1,0 +1,133 @@
+/* ------------------------------ Dashboard Tab ------------------------------ */
+
+/* KPI row layout */
+.kpi-row {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+/* Individual KPI card */
+.kpi-group {
+    flex: 1;
+    min-width: 150px;
+    background-color: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+    text-align: center;
+}
+
+/* KPI label */
+.kpi-group p {
+    margin: 0;
+    font-size: 14px;
+    color: #6c757d;
+}
+
+/* KPI value */
+.kpi-group h3 {
+    margin: 5px 0 0 0;
+    font-size: 24px;
+    font-weight: 600;
+}
+
+/* ------------------------------ Planner Tab -------------------------------- */
+
+/* Align card header title on the left and button on the right */
+.card-header-flex {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+/* Push card header buttons to the far right */
+.card-header-flex button {
+    margin-left: auto;
+}
+
+/* Make header buttons consistent width */
+.header-button {
+    width: 190px;
+    text-align: center;
+}
+
+/* Ensure button stays right-aligned inside header */
+.card-header-flex .header-button {
+    margin-left: auto;
+}
+
+/* General styling for action buttons */
+.shiny-input-actionbutton {
+    padding: 6px 12px;
+    font-size: 14px;
+}
+
+/* Arrange input fields horizontally */
+.input-row {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+    flex-wrap: wrap;
+}
+
+/* Keep each input field evenly spaced */
+.input-group {
+    flex: 1;
+    min-width: 150px;
+}
+
+/* Style input labels */
+.input-group label {
+    font-weight: 500;
+    margin-bottom: 6px;
+}
+
+/* Stack the promotion label above the toggle */
+.promotion-group {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Hide Shiny's default empty checkbox label */
+.promotion-group .form-check-label {
+    display: none;
+}
+
+/* Style the promotion checkbox as a toggle switch */
+#promo {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 80px;
+    height: 28px;
+    background-color: #ccc;
+    border-radius: 999px;
+    position: relative;
+    cursor: pointer;
+    outline: none;
+    transition: 0.3s;
+}
+
+/* Create the toggle circle */
+#promo::before {
+    content: "";
+    position: absolute;
+    width: 22px;
+    height: 22px;
+    top: 50%;
+    left: 3px;
+    transform: translateY(-50%);
+    background-color: white;
+    border-radius: 50%;
+    transition: 0.3s;
+}
+
+/* Change toggle color when promotion is selected */
+#promo:checked {
+    background-color: #28a745;
+}
+
+/* Move toggle circle to the right when selected */
+#promo:checked::before {
+    transform: translate(52px, -50%);
+}
