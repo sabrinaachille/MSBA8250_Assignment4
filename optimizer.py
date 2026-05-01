@@ -1,3 +1,4 @@
+import math
 from ortools.sat.python import cp_model
 
 COGS_RATE     = 0.40
@@ -32,7 +33,7 @@ def optimize_production(demand_output: dict) -> dict:
         q.append(model.NewIntVar(0, ub, f"q_{d['name'].replace(' ', '_')}"))
 
     budget_scaled = int(budget * SCALE)
-    cost_terms    = [int(d["cost"] * SCALE) * q[i] for i, d in enumerate(donuts)]
+    cost_terms = [math.ceil(d["cost"] * SCALE) * q[i] for i, d in enumerate(donuts)]
     model.Add(sum(cost_terms) <= budget_scaled)
 
     profit_terms = [int(d["profit"] * SCALE) * q[i] for i, d in enumerate(donuts)]
