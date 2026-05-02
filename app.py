@@ -1,5 +1,6 @@
 from shiny import App, ui, render, reactive
 from demand import calculate_demand, sales
+from optimizer import optimize_production
 
 
 app_ui = ui.page_navbar(
@@ -14,28 +15,24 @@ app_ui = ui.page_navbar(
             ui.div(
                 {"class": "kpi-row"},
 
-                # Budget Input
                 ui.div(
                     {"class": "kpi-group"},
                     ui.p("Total Sales"),
                     ui.h3("$---")
                 ),
 
-                # Location Input
                 ui.div(
                     {"class": "kpi-group"},
                     ui.p("Total Units Sold"),
                     ui.h3("----")
                 ),
 
-                # Time of Day Input
                 ui.div(
                     {"class": "kpi-group"},
                     ui.p("Average Rating"),
                     ui.h3("----")
                 ),
 
-                # Promotion Input
                 ui.div(
                     {"class": "kpi-group"},
                     ui.p("Waste %"),
@@ -60,13 +57,11 @@ app_ui = ui.page_navbar(
             ui.div(
                 {"class": "input-row"},
 
-                # Budget Input
                 ui.div(
                     {"class": "input-group"},
                     ui.input_numeric("budget", "Budget", value=500),
                 ),
 
-                # Location Input
                 ui.div(
                     {"class": "input-group"},
                     ui.input_select(
@@ -76,7 +71,6 @@ app_ui = ui.page_navbar(
                     ),
                 ),
 
-                # Time of Day Input
                 ui.div(
                     {"class": "input-group"},
                     ui.input_select(
@@ -86,7 +80,6 @@ app_ui = ui.page_navbar(
                     ),
                 ),
 
-                # Promotion Input
                 ui.div(
                     {"class": "input-group promotion-group"},
                     ui.tags.label("Promotion"),
@@ -102,9 +95,7 @@ app_ui = ui.page_navbar(
             ui.card_header(
                 ui.div(
                     {"class": "card-header-flex"},
-
                     ui.h5("Expected Demand"),
-                    
                     ui.input_action_button(
                         "predict",
                         "Run Prediction",
@@ -112,7 +103,6 @@ app_ui = ui.page_navbar(
                     )
                 )
             ),
-            
             ui.output_ui("demand_output")
         ),
 
@@ -123,17 +113,14 @@ app_ui = ui.page_navbar(
             ui.card_header(
                 ui.div(
                     {"class": "card-header-flex"},
-
                     ui.h5("Recommended Plan"),
-                
                     ui.input_action_button(
-                    "optimize",
-                    "Run Optimization",
-                    class_="header-button"
+                        "optimize",
+                        "Run Optimization",
+                        class_="header-button"
                     )
                 )
             ),
-
             ui.output_ui("optimization_output"),
         )
     ),
@@ -146,6 +133,7 @@ app_ui = ui.page_navbar(
 
 def server(input, output, session):
 
+    # ── Expected Demand ───────────────────────────────────────────────────────
     @output
     @render.ui
     @reactive.event(input.predict)
@@ -162,7 +150,6 @@ def server(input, output, session):
 
         results = calculate_demand(user_input, sales)
 
-        # --- Format Donut Output ---
         donut_list = [
             ui.tags.li(
                 f"{item}: {values['predicted_demand']} units "
@@ -171,7 +158,6 @@ def server(input, output, session):
             for item, values in results["donut_demand"].items()
         ]
 
-        # --- Format Drink Output ---
         drink_list = [
             ui.tags.li(
                 f"{item}: {values['predicted_demand']} units "
@@ -183,18 +169,119 @@ def server(input, output, session):
         return ui.div(
             ui.h5("Donuts"),
             ui.tags.ul(*donut_list),
-
             ui.h5("Drinks"),
             ui.tags.ul(*drink_list)
         )
 
+    # ── Recommended Plan ──────────────────────────────────────────────────────
     @output
     @render.ui
     @reactive.event(input.optimize)
     def optimization_output():
+
+        promo_value = "Yes" if input.promo() else "No"
+
+        user_input = [
+            input.budget(),
+            input.time_of_day(),
+            promo_value,
+            input.location()
+        ]
+
+        demand_out = calculate_demand(user_input, sales)
+        result     = optimize_production(demand_out)
+        s          = result["summary"]
+
+        # Infeasible guard
+        if result["status"] not in ("OPTIMAL", "FEASIBLE"):
+            return ui.div(
+                ui.p(
+                    "No feasible plan found. Try increasing your budget.",
+                    style="color:red; padding:12px 0;"
+                )
+            )
+
+        # Summary metrics row
+        summary_row = ui.div(
+            {"style": "display:flex; gap:24px; flex-wrap:wrap; margin-bottom:20px;"},
+            ui.div(
+                ui.p("Total Profit",     style="margin:0; font-size:0.75rem; color:#888; text-transform:uppercase; letter-spacing:1px;"),
+                ui.h4(f"${float(s['total_profit']):.2f}",     style="margin:4px 0 0;"),
+            ),
+            ui.div(
+                ui.p("Total Revenue",    style="margin:0; font-size:0.75rem; color:#888; text-transform:uppercase; letter-spacing:1px;"),
+                ui.h4(f"${float(s['total_revenue']):.2f}",    style="margin:4px 0 0;"),
+            ),
+            ui.div(
+                ui.p("Budget Used",      style="margin:0; font-size:0.75rem; color:#888; text-transform:uppercase; letter-spacing:1px;"),
+                ui.h4(f"${float(s['budget_used']):.2f}",      style="margin:4px 0 0;"),
+            ),
+            ui.div(
+                ui.p("Budget Remaining", style="margin:0; font-size:0.75rem; color:#888; text-transform:uppercase; letter-spacing:1px;"),
+                ui.h4(f"${float(s['budget_remaining']):.2f}", style="margin:4px 0 0;"),
+            ),
+        )
+
+        # Donut table
+        th_style = "text-align:left; padding:8px 10px; border-bottom:2px solid #dee2e6; font-size:0.75rem; text-transform:uppercase; color:#888;"
+        td_style = "padding:8px 10px; border-bottom:1px solid #f0f0f0;"
+
+        donut_rows = [
+            ui.tags.tr(
+                ui.tags.td(name,                           style=td_style),
+                ui.tags.td(str(v["qty_to_produce"]),       style=td_style),
+                ui.tags.td(f"{v['predicted_demand']:.1f}", style=td_style),
+                ui.tags.td(f"${v['unit_price']:.2f}",      style=td_style),
+                ui.tags.td(f"${v['production_cost']:.2f}", style=td_style),
+                ui.tags.td(f"${v['profit']:.2f}",          style=td_style),
+            )
+            for name, v in result["donut_plan"].items()
+        ]
+
+        donut_table = ui.div(
+            ui.h5("Donuts", style="margin-bottom:10px;"),
+            ui.tags.table(
+                {"style": "width:100%; border-collapse:collapse; font-size:0.875rem;"},
+                ui.tags.thead(
+                    ui.tags.tr(*[
+                        ui.tags.th(col, style=th_style)
+                        for col in ["Item", "Qty to Produce", "Predicted Demand", "Unit Price", "Production Cost", "Profit"]
+                    ])
+                ),
+                ui.tags.tbody(*donut_rows),
+            )
+        )
+
+        # Drink table
+        drink_rows = [
+            ui.tags.tr(
+                ui.tags.td(name,                              style=td_style),
+                ui.tags.td(f"{v['predicted_demand']:.1f}",   style=td_style),
+                ui.tags.td(f"${v['unit_price']:.2f}",        style=td_style),
+                ui.tags.td(f"${v['estimated_revenue']:.2f}", style=td_style),
+            )
+            for name, v in result["drink_plan"].items()
+        ]
+
+        drink_table = ui.div(
+            ui.h5("Drinks", style="margin-top:24px; margin-bottom:10px;"),
+            ui.tags.table(
+                {"style": "width:100%; border-collapse:collapse; font-size:0.875rem;"},
+                ui.tags.thead(
+                    ui.tags.tr(*[
+                        ui.tags.th(col, style=th_style)
+                        for col in ["Item", "Expected Demand", "Unit Price", "Est. Revenue"]
+                    ])
+                ),
+                ui.tags.tbody(*drink_rows),
+            )
+        )
+
         return ui.div(
-            ui.p("Optimization recommendation will display here.")
+            summary_row,
+            donut_table,
+            drink_table,
         )
 
 
-app = App(app_ui, server)
+app = App(app_ui, server)     
