@@ -270,7 +270,7 @@ def server(input, output, session):
 
         return ui.HTML(fig.to_html(full_html=False, include_plotlyjs="cdn"))
 
-   # ── Expected Demand ───────────────────────────────────────────────────────
+    # ── Expected Demand ───────────────────────────────────────────────────────
     @output
     @render.ui
     @reactive.event(input.predict)
