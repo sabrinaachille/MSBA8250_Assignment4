@@ -15,12 +15,6 @@
 
 ---
 
-## ▶️ App Walkthrough
-
-> 🔹 Shows: user input → demand prediction → optimization → results dashboard
-
----
-
 ## 🎯 Mission
 
 **“Smart Value, No Waste Goods”**
