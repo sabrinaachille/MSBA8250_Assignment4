@@ -1,7 +1,9 @@
 from shiny import App, ui, render, reactive
+from shinywidgets import output_widget, render_widget
+
 from demand import calculate_demand, sales
 from optimizer import optimize_production
-from visual import (
+from visuals import (
     get_total_sales,
     get_total_units_sold,
     get_average_rating,
@@ -10,7 +12,6 @@ from visual import (
     create_top_products_chart,
     create_sales_by_time_chart
 )
-
 app_ui = ui.page_navbar(
 
     # ------------- Dashboard Tab ---------------------------
