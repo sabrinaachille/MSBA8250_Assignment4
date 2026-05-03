@@ -44,29 +44,29 @@ app_ui = ui.page_navbar(
 
         ui.br(),
 
-        ui.p("Visualization content here")
+        ui.p("Visualization content here"),
 
         ui.br(),
 
         ui.layout_columns(
-          ui.card(
-            ui.card_header("Sales Trend"),
-            ui.output_ui("sales_trend_chart")
-          ),
-          ui.card(
-            ui.card_header("Top Products"),
-            ui.output_ui("top_products_chart")
-          ),
-          col_widths=[6, 6]
+            ui.card(
+                ui.card_header("Sales Trend"),
+                ui.output_ui("sales_trend_chart")
+            ),
+            ui.card(
+                ui.card_header("Top Products"),
+                ui.output_ui("top_products_chart")
+            ),
+            col_widths=[6, 6]
         ),
 
         ui.br(),
 
         ui.card(
-          ui.card_header("Sales by Time of Day"),
-          ui.output_ui("sales_by_time_chart")
+            ui.card_header("Sales by Time of Day"),
+            ui.output_ui("sales_by_time_chart")
+        ),
     ),
-
     # ------------- Planner Tab ------------------------------
     ui.nav_panel(
         "Planner",
