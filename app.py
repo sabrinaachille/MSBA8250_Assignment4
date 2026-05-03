@@ -161,13 +161,6 @@ app_ui = ui.page_navbar(
 
 def server(input, output, session):
 
-    # ── Dashboard Data Prep ───────────────────────────────────────────────────
-    def dashboard_data():
-        df = sales.copy()
-        df["date"] = pd.to_datetime(df["date"])
-        return df
-
-    
     # ── KPI Cards ─────────────────────────────────────────────────────────────
     @output
     @render.text
