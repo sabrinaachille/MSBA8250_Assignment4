@@ -1,6 +1,5 @@
 from shiny import App, ui, render, reactive
 from shinywidgets import output_widget, render_widget
-
 from demand import calculate_demand, sales
 from optimizer import optimize_production
 from visuals import (
@@ -12,6 +11,17 @@ from visuals import (
     create_top_products_chart,
     create_sales_by_time_chart
 )
+
+# Precompute dashboard values once
+total_sales_value = get_total_sales(sales)
+total_units_value = get_total_units_sold(sales)
+avg_rating_value = get_average_rating(sales)
+waste_percent_value = get_waste_percent(sales)
+
+sales_trend_fig = create_sales_trend_chart(sales)
+top_products_fig = create_top_products_chart(sales)
+sales_by_time_fig = create_sales_by_time_chart(sales)
+
 app_ui = ui.page_navbar(
 
     # ------------- Dashboard Tab ---------------------------
@@ -52,27 +62,25 @@ app_ui = ui.page_navbar(
 
         ui.br(),
 
-        ui.p("Visualization content here"),
+        ui.card(
+            ui.card_header("Sales Trend"),
+            output_widget("sales_trend_chart")
+        ),
 
         ui.br(),
 
         ui.layout_columns(
             ui.card(
-                   ui.card_header("Sales Trend"),
-                   output_widget("sales_trend_chart")
-            ),
-            ui.card(
                 ui.card_header("Top Products"),
                 output_widget("top_products_chart")
             ),
+
+            ui.card(
+                ui.card_header("Sales by Time of Day"),
+                output_widget("sales_by_time_chart")
+            ),
+
             col_widths=[6, 6]
-        ),
-
-        ui.br(),
-
-        ui.card(
-             ui.card_header("Sales by Time of Day"),
-             output_widget("sales_by_time_chart")
         ),
     ),
     # ------------- Planner Tab ------------------------------
@@ -166,45 +174,45 @@ def server(input, output, session):
     @output
     @render.text
     def total_sales_kpi():
-        return get_total_sales(sales)
+        return total_sales_value
 
 
     @output
     @render.text
     def total_units_kpi():
-        return get_total_units_sold(sales)
+        return total_units_value
 
 
     @output
     @render.text
     def avg_rating_kpi():
-        return get_average_rating(sales)
+        return avg_rating_value
 
 
     @output
     @render.text
     def waste_percent_kpi():
-        return get_waste_percent(sales)
+        return waste_percent_value
 
-    # ── Visualization 1: Sales Trend Line Chart ───────────────────────────────
+
+    # ── Dashboard Visualizations ──────────────────────────────────────────────
     @output
     @render_widget
     def sales_trend_chart():
-        return create_sales_trend_chart(sales)
+        return sales_trend_fig
 
 
-    # ── Visualization 2: Top Products Bar Chart ───────────────────────────────
     @output
     @render_widget
     def top_products_chart():
-        return create_top_products_chart(sales)
+        return top_products_fig
 
 
-    # ── Visualization 3: Sales by Time of Day Bar Chart ───────────────────────
     @output
     @render_widget
     def sales_by_time_chart():
-        return create_sales_by_time_chart(sales)
+        return sales_by_time_fig
+
     # ── Expected Demand ───────────────────────────────────────────────────────
     @output
     @render.ui
