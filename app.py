@@ -154,6 +154,122 @@ app_ui = ui.page_navbar(
 
 def server(input, output, session):
 
+    # ── Dashboard Data Prep ───────────────────────────────────────────────────
+    def dashboard_data():
+        df = sales.copy()
+        df["date"] = pd.to_datetime(df["date"])
+        return df
+
+
+    # ── Visualization 1: Sales Trend Line Chart ───────────────────────────────
+    @output
+    @render.ui
+    def sales_trend_chart():
+        df = dashboard_data()
+
+        sales_by_date = (
+            df.groupby("date", as_index=False)["total_sales"]
+            .sum()
+            .sort_values("date")
+        )
+
+        sales_by_date["7_day_avg"] = (
+            sales_by_date["total_sales"]
+            .rolling(window=7, min_periods=1)
+            .mean()
+        )
+
+        fig = px.line(
+            sales_by_date,
+            x="date",
+            y=["total_sales", "7_day_avg"],
+            title="Total Sales Trend with 7-Day Average",
+            markers=True,
+            labels={
+                "date": "Date",
+                "value": "Sales",
+                "variable": "Metric"
+            }
+        )
+
+        fig.update_layout(
+            margin=dict(l=20, r=20, t=50, b=20),
+            legend_title_text=""
+        )
+
+        return ui.HTML(fig.to_html(full_html=False, include_plotlyjs="cdn"))
+
+
+    # ── Visualization 2: Top Products Bar Chart ───────────────────────────────
+    @output
+    @render.ui
+    def top_products_chart():
+        df = dashboard_data()
+
+        top_products = (
+            df.groupby("donut_item", as_index=False)["donut_units_sold"]
+            .sum()
+            .sort_values("donut_units_sold", ascending=False)
+            .head(10)
+        )
+
+        fig = px.bar(
+            top_products,
+            x="donut_item",
+            y="donut_units_sold",
+            title="Top Donut Products by Units Sold",
+            labels={
+                "donut_item": "Donut Product",
+                "donut_units_sold": "Units Sold"
+            }
+        )
+
+        fig.update_layout(
+            margin=dict(l=20, r=20, t=50, b=80),
+            xaxis_tickangle=-35
+        )
+
+        return ui.HTML(fig.to_html(full_html=False, include_plotlyjs="cdn"))
+
+
+    # ── Visualization 3: Sales by Time of Day Bar Chart ───────────────────────
+    @output
+    @render.ui
+    def sales_by_time_chart():
+        df = dashboard_data()
+
+        time_order = ["Morning", "Afternoon", "Evening"]
+
+        sales_by_time = (
+            df.groupby("time_of_day", as_index=False)["total_sales"]
+            .sum()
+        )
+
+        sales_by_time["time_of_day"] = pd.Categorical(
+            sales_by_time["time_of_day"],
+            categories=time_order,
+            ordered=True
+        )
+
+        sales_by_time = sales_by_time.sort_values("time_of_day")
+
+        fig = px.bar(
+            sales_by_time,
+            x="time_of_day",
+            y="total_sales",
+            title="Sales by Time of Day",
+            labels={
+                "time_of_day": "Time of Day",
+                "total_sales": "Total Sales"
+            }
+        )
+
+        fig.update_layout(
+            margin=dict(l=20, r=20, t=50, b=20)
+        )
+
+        return ui.HTML(fig.to_html(full_html=False, include_plotlyjs="cdn"))
+
    # ── Expected Demand ───────────────────────────────────────────────────────
     @output
     @render.ui
