@@ -19,25 +19,25 @@ app_ui = ui.page_navbar(
                 ui.div(
                     {"class": "kpi-group"},
                     ui.p("Total Sales"),
-                    ui.h3("$---")
+                    ui.h3(ui.output_text("total_sales_kpi"))
                 ),
 
                 ui.div(
-                    {"class": "kpi-group"},
-                    ui.p("Total Units Sold"),
-                    ui.h3("----")
+                     {"class": "kpi-group"},
+                     ui.p("Total Units Sold"),
+                     ui.h3(ui.output_text("total_units_kpi"))
                 ),
 
                 ui.div(
-                    {"class": "kpi-group"},
-                    ui.p("Average Rating"),
-                    ui.h3("----")
+                     {"class": "kpi-group"},
+                     ui.p("Average Rating"),
+                     ui.h3(ui.output_text("avg_rating_kpi"))
                 ),
 
                 ui.div(
                     {"class": "kpi-group"},
                     ui.p("Waste %"),
-                    ui.h3("----")
+                    ui.h3(ui.output_text("waste_percent_kpi"))
                 ),
             ),
         ),
