@@ -133,7 +133,7 @@ app_ui = ui.page_navbar(
 
 def server(input, output, session):
 
-    # ── Expected Demand ───────────────────────────────────────────────────────
+   # ── Expected Demand ───────────────────────────────────────────────────────
     @output
     @render.ui
     @reactive.event(input.predict)
@@ -150,27 +150,52 @@ def server(input, output, session):
 
         results = calculate_demand(user_input, sales)
 
-        donut_list = [
-            ui.tags.li(
-                f"{item}: {values['predicted_demand']} units "
-                f"(Estimated Sales: ${values['estimated_sales']})"
+        donut_rows = [
+            ui.tags.tr(
+                ui.tags.td(item),
+                ui.tags.td(values["predicted_demand"]),
+                ui.tags.td(f"${values['estimated_sales']}")
             )
             for item, values in results["donut_demand"].items()
         ]
 
-        drink_list = [
-            ui.tags.li(
-                f"{item}: {values['predicted_demand']} units "
-                f"(Estimated Sales: ${values['estimated_sales']})"
+        drink_rows = [
+            ui.tags.tr(
+                ui.tags.td(item),
+                ui.tags.td(values["predicted_demand"]),
+                ui.tags.td(f"${values['estimated_sales']}")
             )
             for item, values in results["drink_demand"].items()
         ]
 
         return ui.div(
             ui.h5("Donuts"),
-            ui.tags.ul(*donut_list),
+            ui.tags.table(
+                {"class": "demand-table"},
+                ui.tags.thead(
+                    ui.tags.tr(
+                        ui.tags.th("Item"),
+                        ui.tags.th("Units"),
+                        ui.tags.th("Estimated Sale")
+                    )
+                ),
+                ui.tags.tbody(*donut_rows)
+            ),
+
+            ui.br(),
+
             ui.h5("Drinks"),
-            ui.tags.ul(*drink_list)
+            ui.tags.table(
+                {"class": "demand-table"},
+                ui.tags.thead(
+                    ui.tags.tr(
+                        ui.tags.th("Item"),
+                        ui.tags.th("Units"),
+                        ui.tags.th("Estimated Sale")
+                    )
+                ),
+                ui.tags.tbody(*drink_rows)
+            )
         )
 
     # ── Recommended Plan ──────────────────────────────────────────────────────

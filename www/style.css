@@ -131,3 +131,22 @@
 #promo:checked::before {
     transform: translate(52px, -50%);
 }
+
+/* Style demand output tables */
+.demand-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 8px;
+}
+
+.demand-table th,
+.demand-table td {
+    padding: 8px 10px;
+    border-bottom: 1px solid #ddd;
+    text-align: left;
+}
+
+.demand-table th {
+    font-weight: 600;
+    background-color: #f8f9fa;
+}
