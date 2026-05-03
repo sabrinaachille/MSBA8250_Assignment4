@@ -160,6 +160,45 @@ def server(input, output, session):
         df["date"] = pd.to_datetime(df["date"])
         return df
 
+    
+    # ── KPI Cards ─────────────────────────────────────────────────────────────
+    @output
+    @render.text
+    def total_sales_kpi():
+        df = dashboard_data()
+        total_sales = df["total_sales"].sum()
+        return f"${total_sales:,.2f}"
+
+
+    @output
+    @render.text
+    def total_units_kpi():
+        df = dashboard_data()
+        total_units = df["donut_units_sold"].sum() + df["drink_units_sold"].sum()
+        return f"{int(total_units):,}"
+
+
+    @output
+    @render.text
+    def avg_rating_kpi():
+        df = dashboard_data()
+        avg_rating = df["customer_rating"].mean()
+        return f"{avg_rating:.2f}"
+
+
+    @output
+    @render.text
+    def waste_percent_kpi():
+        df = dashboard_data()
+
+        total_made = df["donut_units_made"].sum()
+        total_waste = df["donut_waste"].sum()
+
+        if total_made == 0:
+            return "0.0%"
+
+        waste_percent = total_waste / total_made
+        return f"{waste_percent:.1%}"
 
     # ── Visualization 1: Sales Trend Line Chart ───────────────────────────────
     @output
