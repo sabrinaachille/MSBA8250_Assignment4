@@ -72,8 +72,6 @@ We used a **Kanban workflow** to organize and track development, assign ownershi
 
 Ensures predictions are **accurate, stable, and generalizable**
 
----
-
 ### 4️⃣ 📊 Optimization Model (`optimize.py`)
 
 * Uses predicted demand as input
@@ -88,8 +86,6 @@ Ensures predictions are **accurate, stable, and generalizable**
 
 * Cost ≤ budget
 * Production ≤ demand
-
----
 
 ### 5️⃣ 📉 Visualization
 
