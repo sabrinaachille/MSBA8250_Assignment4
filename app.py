@@ -1,8 +1,15 @@
 from shiny import App, ui, render, reactive
 from demand import calculate_demand, sales
 from optimizer import optimize_production
-import pandas as pd
-import plotly.express as px
+from visual import (
+    get_total_sales,
+    get_total_units_sold,
+    get_average_rating,
+    get_waste_percent,
+    create_sales_trend_chart,
+    create_top_products_chart,
+    create_sales_by_time_chart
+)
 
 app_ui = ui.page_navbar(
 
@@ -50,12 +57,12 @@ app_ui = ui.page_navbar(
 
         ui.layout_columns(
             ui.card(
-                ui.card_header("Sales Trend"),
-                ui.output_ui("sales_trend_chart")
+                   ui.card_header("Sales Trend"),
+                   output_widget("sales_trend_chart")
             ),
             ui.card(
                 ui.card_header("Top Products"),
-                ui.output_ui("top_products_chart")
+                output_widget("top_products_chart")
             ),
             col_widths=[6, 6]
         ),
@@ -63,8 +70,8 @@ app_ui = ui.page_navbar(
         ui.br(),
 
         ui.card(
-            ui.card_header("Sales by Time of Day"),
-            ui.output_ui("sales_by_time_chart")
+             ui.card_header("Sales by Time of Day"),
+             output_widget("sales_by_time_chart")
         ),
     ),
     # ------------- Planner Tab ------------------------------
@@ -165,150 +172,45 @@ def server(input, output, session):
     @output
     @render.text
     def total_sales_kpi():
-        df = dashboard_data()
-        total_sales = df["total_sales"].sum()
-        return f"${total_sales:,.2f}"
+        return get_total_sales(sales)
 
 
     @output
     @render.text
     def total_units_kpi():
-        df = dashboard_data()
-        total_units = df["donut_units_sold"].sum() + df["drink_units_sold"].sum()
-        return f"{int(total_units):,}"
+        return get_total_units_sold(sales)
 
 
     @output
     @render.text
     def avg_rating_kpi():
-        df = dashboard_data()
-        avg_rating = df["customer_rating"].mean()
-        return f"{avg_rating:.2f}"
+        return get_average_rating(sales)
 
 
     @output
     @render.text
     def waste_percent_kpi():
-        df = dashboard_data()
-
-        total_made = df["donut_units_made"].sum()
-        total_waste = df["donut_waste"].sum()
-
-        if total_made == 0:
-            return "0.0%"
-
-        waste_percent = total_waste / total_made
-        return f"{waste_percent:.1%}"
+        return get_waste_percent(sales)
 
     # ── Visualization 1: Sales Trend Line Chart ───────────────────────────────
     @output
-    @render.ui
+    @render_widget
     def sales_trend_chart():
-        df = dashboard_data()
-
-        sales_by_date = (
-            df.groupby("date", as_index=False)["total_sales"]
-            .sum()
-            .sort_values("date")
-        )
-
-        sales_by_date["7_day_avg"] = (
-            sales_by_date["total_sales"]
-            .rolling(window=7, min_periods=1)
-            .mean()
-        )
-
-        fig = px.line(
-            sales_by_date,
-            x="date",
-            y=["total_sales", "7_day_avg"],
-            title="Total Sales Trend with 7-Day Average",
-            markers=True,
-            labels={
-                "date": "Date",
-                "value": "Sales",
-                "variable": "Metric"
-            }
-        )
-
-        fig.update_layout(
-            margin=dict(l=20, r=20, t=50, b=20),
-            legend_title_text=""
-        )
-
-        return ui.HTML(fig.to_html(full_html=False, include_plotlyjs="cdn"))
+        return create_sales_trend_chart(sales)
 
 
     # ── Visualization 2: Top Products Bar Chart ───────────────────────────────
     @output
-    @render.ui
+    @render_widget
     def top_products_chart():
-        df = dashboard_data()
-
-        top_products = (
-            df.groupby("donut_item", as_index=False)["donut_units_sold"]
-            .sum()
-            .sort_values("donut_units_sold", ascending=False)
-            .head(10)
-        )
-
-        fig = px.bar(
-            top_products,
-            x="donut_item",
-            y="donut_units_sold",
-            title="Top Donut Products by Units Sold",
-            labels={
-                "donut_item": "Donut Product",
-                "donut_units_sold": "Units Sold"
-            }
-        )
-
-        fig.update_layout(
-            margin=dict(l=20, r=20, t=50, b=80),
-            xaxis_tickangle=-35
-        )
-
-        return ui.HTML(fig.to_html(full_html=False, include_plotlyjs="cdn"))
+        return create_top_products_chart(sales)
 
 
     # ── Visualization 3: Sales by Time of Day Bar Chart ───────────────────────
     @output
-    @render.ui
+    @render_widget
     def sales_by_time_chart():
-        df = dashboard_data()
-
-        time_order = ["Morning", "Afternoon", "Evening"]
-
-        sales_by_time = (
-            df.groupby("time_of_day", as_index=False)["total_sales"]
-            .sum()
-        )
-
-        sales_by_time["time_of_day"] = pd.Categorical(
-            sales_by_time["time_of_day"],
-            categories=time_order,
-            ordered=True
-        )
-
-        sales_by_time = sales_by_time.sort_values("time_of_day")
-
-        fig = px.bar(
-            sales_by_time,
-            x="time_of_day",
-            y="total_sales",
-            title="Sales by Time of Day",
-            labels={
-                "time_of_day": "Time of Day",
-                "total_sales": "Total Sales"
-            }
-        )
-
-        fig.update_layout(
-            margin=dict(l=20, r=20, t=50, b=20)
-        )
-
-        return ui.HTML(fig.to_html(full_html=False, include_plotlyjs="cdn"))
-
+        return create_sales_by_time_chart(sales)
     # ── Expected Demand ───────────────────────────────────────────────────────
     @output
     @render.ui
