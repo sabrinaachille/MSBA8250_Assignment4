@@ -1,7 +1,26 @@
 from shiny import App, ui, render, reactive
+from shinywidgets import output_widget, render_widget
 from demand import calculate_demand, sales
 from optimizer import optimize_production
+from visuals import (
+    get_total_sales,
+    get_total_units_sold,
+    get_average_rating,
+    get_waste_percent,
+    create_sales_trend_chart,
+    create_top_products_chart,
+    create_sales_by_time_chart
+)
 
+# Precompute dashboard values once
+total_sales_value = get_total_sales(sales)
+total_units_value = get_total_units_sold(sales)
+avg_rating_value = get_average_rating(sales)
+waste_percent_value = get_waste_percent(sales)
+
+sales_trend_fig = create_sales_trend_chart(sales)
+top_products_fig = create_top_products_chart(sales)
+sales_by_time_fig = create_sales_by_time_chart(sales)
 
 app_ui = ui.page_navbar(
 
@@ -18,34 +37,52 @@ app_ui = ui.page_navbar(
                 ui.div(
                     {"class": "kpi-group"},
                     ui.p("Total Sales"),
-                    ui.h3("$---")
+                    ui.h3(ui.output_text("total_sales_kpi"))
                 ),
 
                 ui.div(
-                    {"class": "kpi-group"},
-                    ui.p("Total Units Sold"),
-                    ui.h3("----")
+                     {"class": "kpi-group"},
+                     ui.p("Total Units Sold"),
+                     ui.h3(ui.output_text("total_units_kpi"))
                 ),
 
                 ui.div(
-                    {"class": "kpi-group"},
-                    ui.p("Average Rating"),
-                    ui.h3("----")
+                     {"class": "kpi-group"},
+                     ui.p("Average Rating"),
+                     ui.h3(ui.output_text("avg_rating_kpi"))
                 ),
 
                 ui.div(
                     {"class": "kpi-group"},
                     ui.p("Waste %"),
-                    ui.h3("----")
+                    ui.h3(ui.output_text("waste_percent_kpi"))
                 ),
             ),
         ),
 
         ui.br(),
 
-        ui.p("Visualization content here")
-    ),
+        ui.card(
+            ui.card_header("Sales Trend"),
+            output_widget("sales_trend_chart")
+        ),
 
+        ui.br(),
+
+        ui.layout_columns(
+            ui.card(
+                ui.card_header("Top Products"),
+                output_widget("top_products_chart")
+            ),
+
+            ui.card(
+                ui.card_header("Sales by Time of Day"),
+                output_widget("sales_by_time_chart")
+            ),
+
+            col_widths=[6, 6]
+        ),
+    ),
     # ------------- Planner Tab ------------------------------
     ui.nav_panel(
         "Planner",
@@ -133,7 +170,50 @@ app_ui = ui.page_navbar(
 
 def server(input, output, session):
 
-   # ── Expected Demand ───────────────────────────────────────────────────────
+    # ── KPI Cards ─────────────────────────────────────────────────────────────
+    @output
+    @render.text
+    def total_sales_kpi():
+        return total_sales_value
+
+
+    @output
+    @render.text
+    def total_units_kpi():
+        return total_units_value
+
+
+    @output
+    @render.text
+    def avg_rating_kpi():
+        return avg_rating_value
+
+
+    @output
+    @render.text
+    def waste_percent_kpi():
+        return waste_percent_value
+
+
+    # ── Dashboard Visualizations ──────────────────────────────────────────────
+    @output
+    @render_widget
+    def sales_trend_chart():
+        return sales_trend_fig
+
+
+    @output
+    @render_widget
+    def top_products_chart():
+        return top_products_fig
+
+
+    @output
+    @render_widget
+    def sales_by_time_chart():
+        return sales_by_time_fig
+
+    # ── Expected Demand ───────────────────────────────────────────────────────
     @output
     @render.ui
     @reactive.event(input.predict)
