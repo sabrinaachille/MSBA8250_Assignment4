@@ -9,6 +9,12 @@
 
 ---
 
+## 🔗 Demo Link
+
+[SVNG Application](https://sachil01.shinyapps.io/msba8250_assignment4/)
+
+---
+
 ## ▶️ App Walkthrough
 
 > 🔹 Shows: user input → demand prediction → optimization → results dashboard
